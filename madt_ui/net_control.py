@@ -115,6 +115,7 @@ def is_router(container):
 @net_control_bp.route('/container/<string:c_id>')
 async def show_container(c_id):
     lab = request.args.get('lab', 'DEMO')
+    print('/show_container', c_id, lab)
 
     try:
         n = Node.get(Node.name == c_id)

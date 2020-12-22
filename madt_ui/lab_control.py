@@ -121,8 +121,8 @@ async def restart_lab_api():
 
     msgr = Messenger(name)
 
-    # with open(os.path.join('/sockets', name, 'lab.sock'), 'w') as f:
-    #     f.write('no')
+    with open('/mnt/c/Users/Vladislav/Desktop/madt/madt/sockets/'+ name + '/lab.sock', 'w') as f:
+        f.write('no')
     
 
     for container_name in killed_routers:

@@ -81,6 +81,7 @@ def start_lab(lab_path, prefix, image_prefix='', timeout=3*60, poll_interval=10,
             'detach': True,
             'cap_add': ["NET_ADMIN"],
             'version': dc.api._version,
+            'extra_hosts': {'host.docker.internal':'host-gateway'},
         }
 
         if not config['enableInternet']:

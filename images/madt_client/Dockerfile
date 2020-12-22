@@ -3,6 +3,7 @@ FROM python:3-alpine
 RUN apk add -U gcc \
 	       musl-dev \
 	       python3-dev \
+		   py3-pip \
 	       linux-headers \
 	       zeromq-dev \
 	       iproute2 \

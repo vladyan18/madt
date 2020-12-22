@@ -39,15 +39,15 @@ default:
 	@pip3 install -q -r requirements.txt
 	@if [ -d "tmpshards" ]; then rm -rf tmpshards; fi
 	@git clone https://github.com/DesignRevision/shards-dashboard.git tmpshards
-	@cp -nfr tmpshards/* madt_ui/static/
+	@cp -ufr tmpshards/* madt_ui/static/
 	@echo
 	@if [ ! -d "$(MADT_LABS_DIR)" ]; then mkdir -p $(MADT_LABS_DIR); fi
 	@if [ ! -d "$(MADT_LABS_SOCKETS_DIR)" ]; then mkdir -p $(MADT_LABS_SOCKETS_DIR); fi
 
 install:
 	@echo "MADT dir is $(MADT_DIR); Installation dir is $(INSTALL_DIR)"
-	@cp -nfr $(MADT_DIR)/madt_lib $(INSTALL_DIR)
-	@cp -nfr $(MADT_DIR)/madt_ui $(INSTALL_DIR)
+	@cp -ufr $(MADT_DIR)/madt_lib $(INSTALL_DIR)
+	@cp -ufr $(MADT_DIR)/madt_ui $(INSTALL_DIR)
 	@ln -sfn $(INSTALL_DIR)/madt_ui/main.py /usr/local/bin/madt_ui
 	@chmod +x $(INSTALL_DIR)/madt_ui/main.py
 	@cd madt_ui && python3 models.py && cd ../

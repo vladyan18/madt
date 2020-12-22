@@ -299,6 +299,132 @@
       }
 
       setInterval(update_colors, 1000);
+
+      let topology;
+      $.getJSON('/graph.json?lab={{ lab }}', function (resTop) {
+        topology = resTop ;
+      })
+
+     let savedMessages = {}
+      function update_packets() {
+        $.getJSON('/messages_about_packets.json?lab={{ lab }}', function (messages2) {
+            if (!messages2) return;
+
+            let positions = {};
+            //.renderedPosition()
+            cy.nodes().forEach((node) =>{
+              let name = node.id();
+              positions[name] = node.renderedPosition();
+            })
+            //console.log(positions);
+
+            //print(messages)
+
+            for (let checkSum of Object.keys(messages2)) {
+              messages2[checkSum] = messages2[checkSum].sort((a, b) => a['time'] - b['time']);
+              if (!savedMessages[checkSum]) {
+                savedMessages[checkSum] = []
+              }
+              savedMessages[checkSum].push(...messages2[checkSum])
+              checkPacketTranslations(savedMessages[checkSum], positions)
+            }
+            console.log(messages2);
+        })
+      }
+      setInterval(update_packets, 5000);
+
+    function checkPacketTranslations(messages3, positions) {
+      let msgs = [...messages3];
+      let path = [];
+      let ttl = 64;
+      let needToStop = false;
+      while (!needToStop) {
+        needToStop = true;
+        for (let i = 0; i < msgs.length; i++) {
+          if (Number(msgs[i]['ttl']) === ttl) {
+            path.push(msgs[i])
+            needToStop = false;
+            ttl--;
+            msgs.splice(i, 1);
+            break;
+          }
+        }
+      }
+
+      if (path.length == 2) {
+        console.log("PACKET", path[0]['hostname'], path[0]['source'], '->', path[1]['hostname'], path[1]['destination'])
+        let startNode, endNode;
+        if (topology) {
+          let nodes = topology.nodes;
+          for (let j = 0; j < nodes.length; j++){
+            let networks = nodes[j]['scratch']['networks'];
+            for (let network of Object.keys(networks)) {
+              if (networks[network].split('/')[0] === path[0]['source']) {
+                startNode = nodes[j]['data']['id']
+              } else if (networks[network].split('/')[0] === path[1]['destination']) {
+                endNode = nodes[j]['data']['id']
+              }
+            }
+            if (startNode && endNode) break;
+          }
+
+        }
+
+        console.log("PACKET", startNode, '->', path[0]['hostname'], '->', path[1]['hostname'], '->', endNode)
+
+        messages3.splice(0, messages3.length);
+        messages3.push(...msgs);
+        
+        pos1 = positions[path[0]['hostname']];
+        pos2 = positions[path[1]['hostname']];
+
+        pos01 = positions[startNode];
+        pos02 = positions[path[0]['hostname']];
+        pos03 = positions[path[1]['hostname']];
+        pos04 = positions[endNode];
+        animatePacket(pos01, pos02)
+        setTimeout(() => {
+          animatePacket(pos02, pos03)
+          setTimeout(() => {
+            animatePacket(pos03, pos04)
+          }, 3200)
+        }, 3200)
+
+        
+      }
+      
+    }
+
+    function animatePacket(pos1, pos2) {
+        var packetElement =$("<div></div>").appendTo(document.body);
+
+        vector = [pos2['y'] - pos1['y'], pos2['x'] - pos1['x']]
+        vL = Math.floor(Math.sqrt(Math.pow(vector[0], 2) + Math.pow(vector[1], 2)))
+        cos = vector[0]/vL
+        sin = vector[1]/vL
+        packetElement.css({'z-index': 9999999, width: "10px", height: "10px", "background-color": "black", position: "absolute", top: (Math.floor(pos1['y'] + 22*cos)).toString() +'px', left: (Math.floor(pos1['x'] + 20*sin)).toString() + 'px', 'border-radius': '5px'});
+
+        dx = (vL - 20)*cos
+        dy = (vL - 20)*sin
+        dxStr =''
+        dyStr = ''
+
+        if (dx >=0) {
+          dxStr = "+=" + dx + "px"
+        } else {
+          dxStr = "-=" + Math.abs(dx) + "px"
+        }
+
+        if (dy >=0) {
+          dyStr = "+=" + dy + "px"
+        } else {
+          dyStr = "-=" + Math.abs(dy) + "px"
+        }       
+        packetElement.animate({top: dxStr, left: dyStr}, 3000);
+        setTimeout(() => {
+          packetElement.hide()
+        }, 3200)
+    }
     </script>
   </body>
 </html>

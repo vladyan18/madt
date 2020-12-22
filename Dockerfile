@@ -8,6 +8,7 @@ RUN apk add -U gcc \
                net-tools \
                iproute2 \
                python3-dev \
+			   py3-pip \
                linux-headers \
                zeromq-dev \
                curl \
@@ -43,7 +44,7 @@ ADD ./ /madt
 ENV MADT_LABS_SOCKETS_DIR=/madt/sockets 
 ENV MADT_LABS_DIR=/madt/labs
 
-RUN ln -s /usr/lib/python3.7 /usr/lib/python3 && \
+RUN ln -s /usr/lib/python3.8 /usr/lib/python3 && \
     touch ~/.bashrc && make && make install && \
     cp frps.ini /root/frp/frps.ini && \
     mkdir /etc/docker && \

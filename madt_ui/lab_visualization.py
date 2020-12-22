@@ -50,3 +50,12 @@ async def get_messages():
     print('[ msg ]', messages)
     return jsonify(messages)
 
+@lab_visual_bp.route('/messages_about_packets.json')
+async def get_messages_about_packets():
+
+    lab = request.args.get('lab', 'DEMO')
+
+    messages = Messenger.get_messages_about_packets(lab)
+
+    return jsonify(messages)
+
